@@ -1,4 +1,3 @@
-/* comportamiento y lógica */
 (() => {
   const bigError = document.getElementById("big-error");
   const typeZone = document.getElementById("type-zone");
@@ -13,10 +12,20 @@
 
   const audio = document.getElementById("bg-audio");
   const vol = document.getElementById("vol");
-  const downloadAudio = document.getElementById("download-audio");
 
-  // set download link to same src so user can download
-  downloadAudio.href = audio.src;
+  // Crear partículas flotantes
+  const particlesContainer = document.getElementById("particles");
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement("div");
+    particle.className = "particle";
+    particle.style.width = `${Math.random() * 4 + 2}px`;
+    particle.style.height = particle.style.width;
+    particle.style.left = `${Math.random() * 100}%`;
+    particle.style.top = `${Math.random() * 100}%`;
+    particle.style.animationDelay = `${Math.random() * 15}s`;
+    particle.style.animationDuration = `${Math.random() * 10 + 15}s`;
+    particlesContainer.appendChild(particle);
+  }
 
   // connect volume slider
   vol.addEventListener("input", () => {
@@ -24,6 +33,18 @@
   });
   // initial volume
   audio.volume = Number(vol.value);
+
+  // asegurar que iframe no emita sonido (intento)
+  try {
+    // atributo ya presente en HTML; aquí intentamos forzarlo desde DOM
+    iframe.setAttribute("muted", "");
+    // algunos navegadores/devtools exponen propiedad muted en el elemento <iframe>
+    if ("muted" in iframe) iframe.muted = true;
+    // reforzar política de permiso para autoplay (no garantiza silencio, depende del origen)
+    iframe.setAttribute("allow", "autoplay; fullscreen");
+  } catch (e) {
+    /* ignore */
+  }
 
   // autoplay attempt
   const tryPlayAudio = async () => {
@@ -37,39 +58,31 @@
     }
   };
 
-  // SEQUENCE:
-  // 1) blink ERROR 404, after ~2s animate up and shrink
-  // 2) show typewriter typing the sentence
-  // 3) after typed, remove it and start countdown (3 min), show countdown and iframe
-  // 4) when countdown <= 30: hide iframe and start showing images, one per second, for each second remaining
-  // 5) when countdown hits 0: show "You are dead"
-
+  // SECUENCIA según el briefing
   const typeText =
     "The planet Mars has vanished from the solar System. You are going to die. Enjoy your last moments.";
 
   function startSequence() {
-    // allow blink for a bit then move up
     setTimeout(() => {
       bigError.classList.add("small-up");
-      // show typewriter after transition completes
+
       setTimeout(() => {
         typeZone.classList.remove("hidden");
         startTyping(typeText, () => {
-          // After typing done, pause, then fade out typewriter and start countdown
           setTimeout(() => {
             typeZone.classList.add("hidden");
-            beginCountdown(180); // 3 minutes = 180s
-          }, 800);
+            beginCountdown(60); // 1 minuto = 60 segundos
+          }, 1000);
         });
-      }, 1200);
-    }, 1600);
+      }, 1500);
+    }, 2000);
   }
 
-  // typewriter
+  // Efecto de escritura
   function startTyping(text, cb) {
     let i = 0;
     typewriter.textContent = "";
-    const speed = 28; // ms per char
+    const speed = 35;
     const interval = setInterval(() => {
       typewriter.textContent += text[i];
       i++;
@@ -80,32 +93,38 @@
     }, speed);
   }
 
-  // countdown
+  // Cuenta atrás de 3 minutos
   let countdownInterval = null;
   function beginCountdown(totalSeconds) {
     countdownBar.classList.remove("hidden");
     gameArea.classList.remove("hidden");
+    bigError.classList.add("hidden"); // ocultar error cuando aparece el juego
     // ensure audio playing
     tryPlayAudio();
 
     let remaining = totalSeconds;
+
     function update() {
       const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
       const ss = String(remaining % 60).padStart(2, "0");
       countdownEl.textContent = `${mm}:${ss}`;
 
-      // at <=30: hide game and show images
+      // Advertencia cuando quedan 30 segundos
+      if (remaining <= 30 && remaining > 0) {
+        countdownEl.classList.add("countdown-warning");
+      }
+
+      // A los 30 segundos: ocultar juego y mostrar fotos
       if (remaining === 30) {
         gameArea.classList.add("hidden");
         photoArea.classList.remove("hidden");
       }
 
+      // Mostrar una foto diferente cada segundo
       if (remaining <= 30 && remaining > 0) {
-        // show a new photo each second
-        const seed = `mars-${remaining}-${Date.now()}`;
-        // use picsum.photos for dynamic images — each second a different seed
-        const w = Math.min(window.innerWidth * 0.8, 860) | 0;
-        const h = Math.min(window.innerHeight * 0.6, 560) | 0;
+        const seed = `mars-apocalypse-${remaining}-${Date.now()}`;
+        const w = Math.min(window.innerWidth * 0.85, 900) | 0;
+        const h = Math.min(window.innerHeight * 0.55, 600) | 0;
         photoImg.src = `https://picsum.photos/seed/${encodeURIComponent(
           seed
         )}/${w}/${h}`;
@@ -123,45 +142,42 @@
   }
 
   function endSequence() {
-    // hide everything and show final message
     countdownBar.classList.add("hidden");
     gameArea.classList.add("hidden");
     photoArea.classList.add("hidden");
     bigError.classList.add("hidden");
     finalMessage.classList.remove("hidden");
 
-    // ensure audio stops
     try {
       audio.pause();
     } catch (e) {}
   }
 
-  // kick off when DOM ready
+  // Iniciar cuando cargue la página
   window.addEventListener("load", () => {
-    // small safeguard: unhide big error then start sequence
     bigError.classList.remove("hidden");
-    // show big error then begin animations
     startSequence();
 
-    // make iframe visible only after load to avoid prefetch blocking
     iframe.addEventListener("load", () => {
-      console.log("iframe loaded (if allowed by site).");
+      console.log("Game iframe loaded.");
     });
 
-    // allow clicking the volume slider area to trigger audio play (help browsers that block autoplay)
+    // Permitir audio con interacción del usuario
     vol.addEventListener("pointerdown", async () => {
       try {
         await audio.play();
-      } catch (e) {
-        /* ignore */
-      }
-    });
-    // also try clicking anywhere to enable audio
-    document.addEventListener("pointerdown", async function once() {
-      try {
-        await audio.play();
       } catch (e) {}
-      document.removeEventListener("pointerdown", once);
     });
+
+    document.addEventListener(
+      "pointerdown",
+      async function once() {
+        try {
+          await audio.play();
+        } catch (e) {}
+        document.removeEventListener("pointerdown", once);
+      },
+      { once: true }
+    );
   });
 })();
