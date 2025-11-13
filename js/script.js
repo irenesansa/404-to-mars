@@ -93,7 +93,7 @@
     }, speed);
   }
 
-  // Cuenta atrás de 3 minutos
+  // Cuenta atrás
   let countdownInterval = null;
   function beginCountdown(totalSeconds) {
     countdownBar.classList.remove("hidden");
@@ -109,19 +109,19 @@
       const ss = String(remaining % 60).padStart(2, "0");
       countdownEl.textContent = `${mm}:${ss}`;
 
-      // Advertencia cuando quedan 30 segundos
-      if (remaining <= 30 && remaining > 0) {
+      // Advertencia cuando quedan 15 segundos
+      if (remaining <= 15 && remaining > 0) {
         countdownEl.classList.add("countdown-warning");
       }
 
-      // A los 30 segundos: ocultar juego y mostrar fotos
-      if (remaining === 30) {
+      // A los 15 segundos: ocultar juego y mostrar fotos
+      if (remaining === 15) {
         gameArea.classList.add("hidden");
         photoArea.classList.remove("hidden");
       }
 
-      // Mostrar una foto diferente cada segundo
-      if (remaining <= 30 && remaining > 0) {
+      // Mostrar una foto diferente cada segundo (últimos 15s)
+      if (remaining <= 15 && remaining > 0) {
         const seed = `mars-apocalypse-${remaining}-${Date.now()}`;
         const w = Math.min(window.innerWidth * 0.85, 900) | 0;
         const h = Math.min(window.innerHeight * 0.55, 600) | 0;
