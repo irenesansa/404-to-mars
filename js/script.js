@@ -40,8 +40,19 @@
     iframe.setAttribute("muted", "");
     // algunos navegadores/devtools exponen propiedad muted en el elemento <iframe>
     if ("muted" in iframe) iframe.muted = true;
-    // reforzar política de permiso para autoplay (no garantiza silencio, depende del origen)
-    iframe.setAttribute("allow", "autoplay; fullscreen");
+    // restringir permisos: solo fullscreen, sin autoplay ni sonido
+    iframe.setAttribute("allow", "fullscreen");
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+    // intentar silenciar el contenido del iframe (si la política lo permite)
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      if (iframeDoc) {
+        const audios = iframeDoc.querySelectorAll("audio");
+        audios.forEach((audio) => (audio.muted = true));
+      }
+    } catch (e) {
+      // cross-origin: no se puede acceder al contenido del iframe
+    }
   } catch (e) {
     /* ignore */
   }
@@ -60,7 +71,7 @@
 
   // SECUENCIA según el briefing
   const typeText =
-    "The planet Mars has vanished from the solar System. You are going to die. Enjoy your last moments.";
+    "Ground Control to Major Tom. Our scans confirm the impossible — Mars has vanished from the solar system. There is no orbit, no light, no trace of the planet you were meant to reach. Navigation systems have failed, and no rescue is possible. In less than one minute, all communication will cease, and you will die. We’re with you until the very last signal. This transmission marks the end of the mission. Earth thanks you for your service. Farewell, Major Tom.";
 
   function startSequence() {
     setTimeout(() => {
@@ -69,10 +80,12 @@
       setTimeout(() => {
         typeZone.classList.remove("hidden");
         startTyping(typeText, () => {
+          // dejar el texto visible unos segundos para que el usuario pueda leerlo
+          const readDelayMs = 4000; // ajustar si quieres más/menos tiempo
           setTimeout(() => {
             typeZone.classList.add("hidden");
             beginCountdown(60); // 1 minuto = 60 segundos
-          }, 1000);
+          }, readDelayMs);
         });
       }, 1500);
     }, 2000);
@@ -82,7 +95,7 @@
   function startTyping(text, cb) {
     let i = 0;
     typewriter.textContent = "";
-    const speed = 35;
+    const speed = 60;
     const interval = setInterval(() => {
       typewriter.textContent += text[i];
       i++;

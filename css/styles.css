@@ -19,7 +19,8 @@
 html,
 body {
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body {
@@ -96,19 +97,21 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 2rem;
+  padding: 1rem;
   z-index: 1;
 }
 
 #crt {
   width: 100%;
+  height: auto;
   max-width: 1400px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 2rem;
+  padding: 1rem;
+  gap: clamp(20px, 5vw, 100px);
 }
 
 /* efecto CRT scanlines mejorado */
@@ -220,7 +223,7 @@ body {
 
 /* ERROR 404 grande */
 #big-error {
-  font-size: clamp(48px, 12vw, 140px);
+  font-size: clamp(48px, 12vw, 180px);
   font-weight: 900;
   letter-spacing: 8px;
   animation: glitchBlink 1s ease-in-out infinite;
@@ -274,12 +277,11 @@ body {
 
 /* zona de escritura */
 #type-zone {
-  margin-top: 2rem;
   max-width: 90%;
 }
 
 #typewriter {
-  color: #d0e8ff;
+  color: var(--neon-green);
   font-size: clamp(16px, 2.5vw, 28px);
   font-weight: 500;
   background: rgba(0, 20, 40, 0.6);
@@ -316,7 +318,6 @@ body {
 
 /* cuenta atrás */
 #countdown-bar {
-  margin-top: 2rem;
   position: fixed;
   top: 8vh;
   left: 50%;
@@ -325,7 +326,7 @@ body {
 }
 
 #countdown {
-  font-size: clamp(48px, 12vw, 120px);
+  font-size: clamp(48px, 12vw, 180px);
   font-weight: 900;
   color: var(--neon-pink);
   text-shadow: 0 0 20px rgba(255, 110, 199, 0.8),
@@ -356,7 +357,7 @@ body {
 
 /* área del juego */
 #game-area {
-  margin-top: 25vh;
+  margin-top: clamp(15vh, 20vw, 35vh);
   width: 100%;
   display: flex;
   justify-content: center;
@@ -373,7 +374,7 @@ body {
 
 /* área de fotos */
 #photo-area {
-  margin-top: 25vh;
+  margin-top: clamp(15vh, 20vw, 35vh);
   width: 100%;
   display: flex;
   justify-content: center;
@@ -407,6 +408,7 @@ body {
 
 /* mensaje final */
 #final-message {
+  margin: 10vh;
   position: fixed;
   inset: 0;
   display: flex;
@@ -421,11 +423,11 @@ body {
 }
 
 .dead-message {
-  font-size: clamp(40px, 10vw, 120px);
+  font-size: clamp(32px, 12vw, 120px);
   font-weight: 900;
   color: var(--neon-red);
   text-transform: uppercase;
-  letter-spacing: 12px;
+  letter-spacing: clamp(6px, 2vw, 12px);
   text-shadow: 0 0 20px rgba(255, 68, 68, 1), 0 0 40px rgba(255, 68, 68, 0.8),
     0 0 60px rgba(255, 68, 68, 0.6), 0 0 80px rgba(255, 68, 68, 0.4);
   animation: deathPulse 2s ease-in-out infinite;
@@ -451,6 +453,7 @@ body {
 
   #crt {
     padding: 1rem;
+    gap: clamp(15px, 4vw, 50px);
   }
 
   #big-error {
@@ -468,6 +471,14 @@ body {
     padding: 8px 20px;
   }
 
+  #game-iframe {
+    height: min(50vh, 300px);
+  }
+
+  #photo {
+    height: min(50vh, 300px);
+  }
+
   #ui-top-right {
     top: 10px;
     right: 10px;
@@ -477,5 +488,81 @@ body {
 
   #ui-top-right input[type="range"] {
     width: 80px;
+  }
+
+  .dead-message {
+    font-size: clamp(28px, 11vw, 80px);
+    letter-spacing: clamp(5px, 1.5vw, 10px);
+  }
+}
+
+/* pantallas muy pequeñas */
+@media (max-width: 480px) {
+  .stage {
+    padding: 0.5rem;
+  }
+
+  #crt {
+    padding: 0.5rem;
+    gap: clamp(10px, 3vw, 30px);
+  }
+
+  #big-error {
+    font-size: clamp(28px, 12vw, 70px);
+    letter-spacing: 3px;
+  }
+
+  #typewriter {
+    font-size: clamp(12px, 3.5vw, 18px);
+    padding: 12px 14px;
+    max-width: 90vw;
+  }
+
+  #countdown {
+    font-size: clamp(24px, 8vw, 48px);
+    padding: 6px 16px;
+    letter-spacing: 4px;
+  }
+
+  #countdown-bar {
+    top: 5vh;
+  }
+
+  #game-area {
+    margin-top: clamp(10vh, 15vw, 20vh);
+  }
+
+  #photo-area {
+    margin-top: clamp(10vh, 15vw, 20vh);
+  }
+
+  #game-iframe {
+    width: min(95vw, 100%);
+    height: min(45vh, 280px);
+  }
+
+  #photo {
+    width: min(95vw, 100%);
+    height: min(45vh, 280px);
+  }
+
+  #ui-top-right {
+    top: 8px;
+    right: 8px;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  #ui-top-right label {
+    font-size: 1rem;
+  }
+
+  #ui-top-right input[type="range"] {
+    width: 70px;
+  }
+
+  .dead-message {
+    font-size: clamp(24px, 10vw, 60px);
+    letter-spacing: clamp(4px, 1.2vw, 8px);
   }
 }
